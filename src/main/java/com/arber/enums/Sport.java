@@ -1,11 +1,16 @@
 package com.arber.enums;
 
 public enum Sport {
-    NFL,
-    NBA,
-    MLB,
     SOCCER,
-    AFL,
+    BASKETBALL,
+    AMERICAN_FOOTBALL,
     TENNIS,
-    MMA;
+    HORSE_RACING,
+    CRICKET,
+    BASEBALL,
+    MMA,
+    HOCKEY,
+    RUGBY,
+    AUSTRALIAN_FOOTBALL,
+    GOLF;
 }
