@@ -2,28 +2,62 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
+    <!-- Project Information -->
+    <groupId>com.arber</groupId>
     <artifactId>Arber</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>Arber Project</name>
 
+    <!-- Dependencies -->
     <dependencies>
-        <!-- HTTP Client -->
+        <!-- HTTP Client (java.net.http is part of Java 11+, but keeping Apache HTTPClient if needed) -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
             <version>5.2</version>
         </dependency>
 
-        <!-- JSON Parsing (Gson) -->
+        <!-- Jackson for JSON Parsing -->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.3</version> <!-- Use the latest version if possible -->
         </dependency>
     </dependencies>
 
+    <!-- Build Configuration -->
+    <build>
+        <plugins>
+            <!-- Maven Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version> <!-- Ensure a recent version for Java 21 support -->
+                <configuration>
+                    <source>21</source> <!-- Set Java source compatibility to 21 -->
+                    <target>21</target> <!-- Set Java bytecode compatibility to 21 -->
+                </configuration>
+            </plugin>
 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <mainClass>com.arber.Main</mainClass>
+                </configuration>
+            </plugin>
 
+        </plugins>
+    </build>
+
+    <!-- Properties Section (Optional) -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+    </properties>
 </project>
