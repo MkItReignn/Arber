@@ -7,12 +7,13 @@ import com.arber.enums.League;
 import com.arber.model.Event;
 import com.arber.model.Odds;
 import java.util.List;
+import java.util.Set;
 
 public interface SportsApiClient {
 
-    List<Sport> fetchAvailableSports();
+    Set<Sport> fetchAvailableSports();
 
-    List<League> fetchAvailableLeagues();
+    Set<League> fetchAvailableLeagues();
     List<League> fetchAvailableLeagues(Sport aSport);
 
     List<Event> fetchEvents(League aLeague);
