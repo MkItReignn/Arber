@@ -1,65 +1,76 @@
 package com.arber.enums;
 
 public enum League {
-    // Soccer Leagues
-    PREMIER_LEAGUE(Sport.SOCCER),
-    LA_LIGA(Sport.SOCCER),
-    SERIE_A(Sport.SOCCER),
-    BUNDESLIGA(Sport.SOCCER),
-    UEFA_CHAMPIONS_LEAGUE(Sport.SOCCER),
+    // American Football Leagues
+    NCAAF(Sport.AMERICAN_FOOTBALL),
+    NFL(Sport.AMERICAN_FOOTBALL),
+    NFL_SUPER_BOWL(Sport.AMERICAN_FOOTBALL),
+
+    // Aussie Rules Football
+    AFL(Sport.AUSTRALIAN_FOOTBALL),
+
+    // Baseball Leagues
+    MLB(Sport.BASEBALL),
 
     // Basketball Leagues
     NBA(Sport.BASKETBALL),
     EUROLEAGUE(Sport.BASKETBALL),
-    NCAA(Sport.BASKETBALL),
+    NBL(Sport.BASKETBALL),
+    NCAAB(Sport.BASKETBALL),
 
-    // American Football Leagues
-    NFL(Sport.AMERICAN_FOOTBALL),
-    NCAA_FOOTBALL(Sport.AMERICAN_FOOTBALL),
-
-    // Tennis (Grand Slam Events)
-    WIMBLEDON(Sport.TENNIS),
-    US_OPEN(Sport.TENNIS),
-    FRENCH_OPEN(Sport.TENNIS),
-    AUSTRALIAN_OPEN(Sport.TENNIS),
-
-    // Horse Racing Events
-    KENTUCKY_DERBY(Sport.HORSE_RACING),
-    MELBOURNE_CUP(Sport.HORSE_RACING),
-    GRAND_NATIONAL(Sport.HORSE_RACING),
+    // Boxing
+    BOXING(Sport.BOXING),
 
     // Cricket Leagues
-    IPL(Sport.CRICKET),
-    BIG_BASH_LEAGUE(Sport.CRICKET),
-    ICC_WORLD_CUP(Sport.CRICKET),
-    THE_ASHES(Sport.CRICKET),
-
-    // Baseball Leagues
-    MLB(Sport.BASEBALL),
-    NPB(Sport.BASEBALL),
-
-    // MMA Organizations
-    UFC(Sport.MMA),
-    BELLATOR(Sport.MMA),
-
-    // Hockey Leagues
-    NHL(Sport.HOCKEY),
-    KHL(Sport.HOCKEY),
-    IIHF_WORLD_CHAMPIONSHIP(Sport.HOCKEY),
-
-    // Rugby Leagues
-    NRL(Sport.RUGBY),
-    SUPER_RUGBY(Sport.RUGBY),
-    SIX_NATIONS(Sport.RUGBY),
-
-    // Australian Football League
-    AFL(Sport.AUSTRALIAN_FOOTBALL),
+    BIG_BASH(Sport.CRICKET),
+    TEST_MATCHES(Sport.CRICKET),
 
     // Golf Tournaments
     MASTERS(Sport.GOLF),
     PGA_CHAMPIONSHIP(Sport.GOLF),
     US_OPEN_GOLF(Sport.GOLF),
-    THE_OPEN_CHAMPIONSHIP(Sport.GOLF);
+    THE_OPEN_CHAMPIONSHIP(Sport.GOLF),
+
+    // Ice Hockey Leagues
+    NHL(Sport.ICE_HOCKEY),
+    HOCKEY_ALLSVENSKAN(Sport.ICE_HOCKEY),
+    SHL(Sport.ICE_HOCKEY),
+
+    // MMA
+    MMA(Sport.MMA),
+
+    // Rugby Leagues
+    NRL(Sport.RUGBY),
+
+    // Soccer Leagues
+    A_LEAGUE(Sport.SOCCER),
+    AUSTRIAN_BUNDESLIGA(Sport.SOCCER),
+    BELGIUM_FIRST_DIV(Sport.SOCCER),
+    EFL_CHAMPIONSHIP(Sport.SOCCER),
+    EFL_CUP(Sport.SOCCER),
+    EFL_LEAGUE_ONE(Sport.SOCCER),
+    EFL_LEAGUE_TWO(Sport.SOCCER),
+    PREMIER_LEAGUE(Sport.SOCCER),
+    FA_CUP(Sport.SOCCER),
+    FIFA_WORLD_CUP(Sport.SOCCER),
+    LIGUE_ONE(Sport.SOCCER),
+    LIGUE_TWO(Sport.SOCCER),
+    BUNDESLIGA(Sport.SOCCER),
+    BUNDESLIGA_TWO(Sport.SOCCER),
+    SUPER_LEAGUE_GREECE(Sport.SOCCER),
+    SERIE_A(Sport.SOCCER),
+    SERIE_B(Sport.SOCCER),
+    LEAGUE_OF_IRELAND(Sport.SOCCER),
+    LIGA_MX(Sport.SOCCER),
+    DUTCH_EREDEVISIE(Sport.SOCCER),
+    PRIMEIRA_LIGA(Sport.SOCCER),
+    LA_LIGA(Sport.SOCCER),
+    LA_LIGA_TWO(Sport.SOCCER),
+    SCOTTISH_PREMIERSHIP(Sport.SOCCER),
+    ALLSVENSKAN(Sport.SOCCER),
+    SWISS_SUPER_LEAGUE(Sport.SOCCER),
+    UEFA_CHAMPIONS_LEAGUE(Sport.SOCCER),
+    UEFA_EUROPA_LEAGUE(Sport.SOCCER);
 
     private final Sport theSport;
 

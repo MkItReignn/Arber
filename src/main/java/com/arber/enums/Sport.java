@@ -9,8 +9,9 @@ public enum Sport {
     CRICKET,
     BASEBALL,
     MMA,
-    HOCKEY,
+    ICE_HOCKEY,
     RUGBY,
     AUSTRALIAN_FOOTBALL,
-    GOLF;
+    GOLF,
+    BOXING;
 }
