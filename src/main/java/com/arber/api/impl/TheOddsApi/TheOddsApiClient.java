@@ -1,30 +1,33 @@
 package com.arber.api.impl;
 
 import com.arber.api.SportsApiClient;
-import com.arber.enums.BookmakerType;
+import com.arber.api.impl.TheOddsApi.TheOddsApiMetadataFactory;
+import com.arber.enums.Bookmaker;
 import com.arber.enums.League;
 import com.arber.enums.MarketType;
 import com.arber.enums.Sport;
-import com.arber.model.Event;
+import com.arber.model.EventMetadata;
 import com.arber.model.Odds;
 
 import java.net.http.HttpClient;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.arber.model.SportsMetadata;
 import com.arber.model.theoddsapi.TheOddsApiSport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TheOddsApiClient implements SportsApiClient {
-    private static final String theApiKey = System.getenv("API_KEY");
-    private static final String theVersion = System.getenv("API_VERSION");
-    private static final String theBaseUrl = System.getenv("BASE_URL");
-    private static final String theApiName = System.getenv("API_NAME");
+    private static final String API_KEY = System.getenv("API_KEY");
+    private static final String API_VERSION = System.getenv("API_VERSION");
+    private static final String BASE_URL = System.getenv("BASE_URL");
+    private static final String API_NAME = System.getenv("API_NAME");
+    // TODO: Add this to another class
+    private final TheOddsApiEndpointProvider theOddsApiEndpointProvider;
     private String theSportsEndpoint;
     private String theOddsEndpoint;
     private String theScoresEndpoint;
@@ -34,27 +37,13 @@ public class TheOddsApiClient implements SportsApiClient {
     private final HttpClient theHttpClient;
     private final ObjectMapper theObjectMapper;
 
-    static {
-        java.util.function.Predicate<String> isNullOrEmpty = myVariable -> myVariable == null ||
-                myVariable.trim().isEmpty();
-
-        if (isNullOrEmpty.test(theApiKey)) {
-            throw new IllegalStateException("Environment variable 'API_KEY' is not set or is empty.");
-        }
-        if (isNullOrEmpty.test(theVersion)) {
-            throw new IllegalStateException("Environment variable 'API_VERSION' is not set or is empty.");
-        }
-        if (isNullOrEmpty.test(theBaseUrl)) {
-            throw new IllegalStateException("Environment variable 'BASE_URL' is not set or is empty.");
-        }
-        if (isNullOrEmpty.test(theApiName)) {
-            throw new IllegalStateException("Environment variable 'API_NAME' is not set or is empty.");
-        }
-    }
+    // TODO: Add into factory constructor
 
     public TheOddsApiClient() {
-        this.theHttpClient = HttpClient.newHttpClient();
-        this.theObjectMapper = new ObjectMapper();
+        theVersionMetadata = TheOddsApiMetadataFactory.provideTheOddsApiVersionMetadata();
+        theHttpClient = HttpClient.newHttpClient();
+        theObjectMapper = new ObjectMapper();
+        theOddsApiEndpointProvider = new TheOddsApiEndpointProvider();
     }
 
 
@@ -62,7 +51,7 @@ public class TheOddsApiClient implements SportsApiClient {
     public Set<Sport> fetchAvailableSports() {
         try {
             Set<Sport> mySetOfSports = new HashSet<>();
-            final String myEndPoint = theBaseUrl + "/" + theVersion + "/" + "sports?apiKey=" + theApiKey;
+            final String myEndPoint = BASE_URL + "/" + API_VERSION + "/" + "sports?apiKey=" + API_KEY;
 
             TheOddsApiSport[] myOddsApiSports = executeGet(myEndPoint, TheOddsApiSport[].class);
 
@@ -72,6 +61,7 @@ public class TheOddsApiClient implements SportsApiClient {
                 if (mySport != null) {
                     mySetOfSports.add(mySport);
                 } else {
+                    // TODO: Use SL4J with logback - ChatGPT
                     System.err.println("Warning: Unrecognized sport group - " + myOddsApiSport.theGroup);
                 }
             }
@@ -82,6 +72,7 @@ public class TheOddsApiClient implements SportsApiClient {
         }
     }
 
+    // TODO: Put this in another class TheOddsSchemaConverter
     private Sport mapGroupToSport(String aGroup) {
         if (aGroup == null) {
             return null;
@@ -107,27 +98,14 @@ public class TheOddsApiClient implements SportsApiClient {
 
     @Override
     public Set<League> fetchAvailableLeagues() {
-        try {
-            Set<League> mySetOfLeagues = new HashSet<>();
-            final String myEndPoint = theBaseUrl + "/" + theVersion + "/" + "sports?apiKey=" + theApiKey;
-
-            TheOddsApiSport[] myOddsApiSports = executeGet(myEndPoint, TheOddsApiSport[].class);
-
-            for (TheOddsApiSport myOddsApiSport : myOddsApiSports) {
-                League myLeague = mapTitleToLeague(myOddsApiSport.theTitle);
-                if (myLeague != null) {
-                    mySetOfLeagues.add(myLeague);
-                } else {
-                    System.err.println("Warning: Unrecognized league title - " + myOddsApiSport.theTitle);
-                }
-            }
-
-            return mySetOfLeagues;
-        } catch (Exception myException) {
-            throw new RuntimeException("Failed to fetch available leagues", myException);
+        Set<League> allLeagues = new HashSet<>();
+        for (Sport aSport : fetchAvailableSports()) {
+            allLeagues.addAll(fetchAvailableLeagues(aSport));
         }
+        return allLeagues;
     }
 
+    // TODO: Move this as well
     private League mapTitleToLeague(String aTitle) {
         if (aTitle == null) {
             return null;
@@ -214,13 +192,40 @@ public class TheOddsApiClient implements SportsApiClient {
     }
 
     @Override
-    public List<League> fetchAvailableLeagues(Sport aSport) {
-        // Similarly, might rely on known mappings or from event endpoints
+    public Set<League> fetchAvailableLeagues(Sport aSport) {
+        try {
+            Set<League> mySetOfLeagues = new HashSet<>();
+            final String myEndPoint = BASE_URL + "/" + API_VERSION + "/" + "sports?apiKey=" + API_KEY;
+
+            TheOddsApiSport[] myOddsApiSports = executeGet(myEndPoint, TheOddsApiSport[].class);
+
+            for (TheOddsApiSport myOddsApiSport : myOddsApiSports) {
+                if (mapGroupToSport(myOddsApiSport.theGroup) == aSport) {
+                    League myLeague = mapTitleToLeague(myOddsApiSport.theTitle);
+                    if (myLeague != null) {
+                        mySetOfLeagues.add(myLeague);
+                    } else {
+                        System.err.println("Warning: Unrecognized league title - " + myOddsApiSport.theTitle);
+                    }
+                }
+            }
+
+            return mySetOfLeagues;
+        } catch (Exception myException) {
+            throw new RuntimeException("Failed to fetch available leagues for sport: " + aSport, myException);
+        }
+    }
+
+    @Override
+    public Set<EventMetadata> fetchAvailableEvents() {
+
+        // GET /v4/sports/{sport}/events?apiKey={apiKey}
+        // You need to map your League to a TheOddsApi sport key
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
-    public List<Event> fetchEvents(League aLeague) {
+    public Set<EventMetadata> fetchAvailableEvents(SportsMetadata aSportsMetadata) {
         // GET /v4/sports/{sport}/events?apiKey={apiKey}
         // You need to map your League to a TheOddsApi sport key
         throw new UnsupportedOperationException("Not implemented yet");
@@ -235,7 +240,7 @@ public class TheOddsApiClient implements SportsApiClient {
     }
 
     @Override
-    public List<BookmakerType> fetchBookmakerTypes(String anEventId) {
+    public List<Bookmaker> fetchBookmakerTypes(String anEventId) {
         // Similar logic: Call event odds or odds endpoint, parse bookmakers, and return the corresponding BookmakerTypes.
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -249,7 +254,7 @@ public class TheOddsApiClient implements SportsApiClient {
     }
 
     @Override
-    public List<Odds> fetchOdds(String anEventId, BookmakerType aBookmakerType) {
+    public List<Odds> fetchOdds(String anEventId, Bookmaker aBookmaker) {
         // Similar to fetchOdds(String), but filter by a specific bookmaker key in the response.
         throw new UnsupportedOperationException("Not implemented yet");
     }
@@ -262,7 +267,7 @@ public class TheOddsApiClient implements SportsApiClient {
 
     @Override
     public String getApiName() {
-        return theApiName;
+        return API_NAME;
     }
 
     private <T> T executeGet(String anEndpoint, Class<T> aResponseType) throws Exception {
