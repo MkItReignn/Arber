@@ -1,68 +1,58 @@
-package com.arber.api.impl;
+package com.arber.api.impl.TheOddsApi;
 
 import com.arber.api.SportsApiClient;
-import com.arber.api.impl.TheOddsApi.TheOddsApiMetadataFactory;
-import com.arber.enums.Bookmaker;
-import com.arber.enums.League;
-import com.arber.enums.MarketType;
-import com.arber.enums.Sport;
-import com.arber.model.EventMetadata;
-import com.arber.model.Odds;
+import com.arber.enums.*;
+import com.arber.model.*;
 
+import java.awt.print.Book;
 import java.net.http.HttpClient;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
-import com.arber.model.SportsMetadata;
-import com.arber.model.theoddsapi.TheOddsApiSport;
+import com.arber.model.TheOddsApi.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TheOddsApiClient implements SportsApiClient {
-    private static final String API_KEY = System.getenv("API_KEY");
-    private static final String API_VERSION = System.getenv("API_VERSION");
-    private static final String BASE_URL = System.getenv("BASE_URL");
-    private static final String API_NAME = System.getenv("API_NAME");
-    // TODO: Add this to another class
-    private final TheOddsApiEndpointProvider theOddsApiEndpointProvider;
-    private String theSportsEndpoint;
-    private String theOddsEndpoint;
-    private String theScoresEndpoint;
-    private String theEventsEndpoint;
-    private String theEventOddsEndpoint;
+    private final Logger theLogger = LoggerFactory.getLogger(TheOddsApiClient.class);
 
+    private final TheOddsApiEndpointProvider theOddsApiEndpointProvider;
     private final HttpClient theHttpClient;
     private final ObjectMapper theObjectMapper;
+    // NOTE: Maybe create a class within this class of this cache.
+    private final Map<String, String> theEventIdToLeagueKeyCache;
+    private final Map<League, String> theLeagueToKeyCache;
 
-    // TODO: Add into factory constructor
 
     public TheOddsApiClient() {
-        theVersionMetadata = TheOddsApiMetadataFactory.provideTheOddsApiVersionMetadata();
+        theOddsApiEndpointProvider = new TheOddsApiEndpointProvider();
         theHttpClient = HttpClient.newHttpClient();
         theObjectMapper = new ObjectMapper();
-        theOddsApiEndpointProvider = new TheOddsApiEndpointProvider();
+        theEventIdToLeagueKeyCache = new ConcurrentHashMap<>();
+        theLeagueToKeyCache = new ConcurrentHashMap<>();
     }
-
 
     @Override
     public Set<Sport> fetchAvailableSports() {
         try {
             Set<Sport> mySetOfSports = new HashSet<>();
-            final String myEndPoint = BASE_URL + "/" + API_VERSION + "/" + "sports?apiKey=" + API_KEY;
+            final String myEndPoint = theOddsApiEndpointProvider.sportsEndpoint();
 
             TheOddsApiSport[] myOddsApiSports = executeGet(myEndPoint, TheOddsApiSport[].class);
 
             for (TheOddsApiSport myOddsApiSport : myOddsApiSports ) {
-                Sport mySport = mapGroupToSport(myOddsApiSport.theGroup);
+                Sport mySport = TheOddsSchemaConverter.mapGroupToSport(myOddsApiSport.getTheGroup());
 
                 if (mySport != null) {
                     mySetOfSports.add(mySport);
                 } else {
-                    // TODO: Use SL4J with logback - ChatGPT
-                    System.err.println("Warning: Unrecognized sport group - " + myOddsApiSport.theGroup);
+                    theLogger.warn("Warning: Unrecognized sport group - {}", myOddsApiSport.getTheGroup());
                 }
             }
 
@@ -70,30 +60,6 @@ public class TheOddsApiClient implements SportsApiClient {
         } catch (Exception myException) {
             throw new RuntimeException("Failed to fetch available sports", myException);
         }
-    }
-
-    // TODO: Put this in another class TheOddsSchemaConverter
-    private Sport mapGroupToSport(String aGroup) {
-        if (aGroup == null) {
-            return null;
-        }
-
-        return switch (aGroup.toLowerCase()) {
-            case "soccer" -> Sport.SOCCER;
-            case "basketball" -> Sport.BASKETBALL;
-            case "american football" -> Sport.AMERICAN_FOOTBALL;
-            case "tennis" -> Sport.TENNIS;
-            case "horse racing" -> Sport.HORSE_RACING;
-            case "cricket" -> Sport.CRICKET;
-            case "baseball" -> Sport.BASEBALL;
-            case "mixed martial arts" -> Sport.MMA;
-            case "ice hockey" -> Sport.ICE_HOCKEY;
-            case "rugby league" -> Sport.RUGBY;
-            case "aussie rules" -> Sport.AUSTRALIAN_FOOTBALL;
-            case "golf" -> Sport.GOLF;
-            case "boxing" -> Sport.BOXING;
-            default -> null; // Return null for unmatched group names
-        };
     }
 
     @Override
@@ -105,107 +71,21 @@ public class TheOddsApiClient implements SportsApiClient {
         return allLeagues;
     }
 
-    // TODO: Move this as well
-    private League mapTitleToLeague(String aTitle) {
-        if (aTitle == null) {
-            return null;
-        }
-
-        String myNormalizedTitle = aTitle.toLowerCase();
-
-        return switch (myNormalizedTitle) {
-            // American Football
-            case "ncaaf" -> League.NCAAF;
-            case "ncaaf championship winner" -> League.NCAAF;
-            case "nfl" -> League.NFL;
-            case "nfl super bowl winner" -> League.NFL_SUPER_BOWL;
-
-            // Aussie Rules
-            case "afl" -> League.AFL;
-
-            // Baseball
-            case "mlb world series winner" -> League.MLB;
-
-            // Basketball
-            case "nba" -> League.NBA;
-            case "nba championship winner" -> League.NBA;
-            case "basketball euroleague" -> League.EUROLEAGUE;
-            case "nbl" -> League.NBL;
-            case "ncaab", "ncaab championship winner" -> League.NCAAB;
-
-            // Boxing
-            case "boxing" -> League.BOXING;
-
-            // Cricket
-            case "big bash" -> League.BIG_BASH;
-            case "test matches" -> League.TEST_MATCHES;
-
-            // Golf
-            case "masters tournament winner" -> League.MASTERS;
-            case "pga championship winner" -> League.PGA_CHAMPIONSHIP;
-            case "the open winner" -> League.THE_OPEN_CHAMPIONSHIP;
-            case "us open winner" -> League.US_OPEN_GOLF;
-
-            // Ice Hockey
-            case "nhl" -> League.NHL;
-            case "nhl championship winner" -> League.NHL;
-            case "hockeyallsvenskan" -> League.HOCKEY_ALLSVENSKAN;
-            case "shl" -> League.SHL;
-
-            // MMA
-            case "mma" -> League.MMA;
-
-            // Rugby
-            case "nrl" -> League.NRL;
-
-            // Soccer
-            case "a-league" -> League.A_LEAGUE;
-            case "austrian football bundesliga" -> League.AUSTRIAN_BUNDESLIGA;
-            case "belgium first div" -> League.BELGIUM_FIRST_DIV;
-            case "championship" -> League.EFL_CHAMPIONSHIP;
-            case "efl cup" -> League.EFL_CUP;
-            case "league 1" -> League.EFL_LEAGUE_ONE;
-            case "league 2" -> League.EFL_LEAGUE_TWO;
-            case "epl" -> League.PREMIER_LEAGUE;
-            case "fa cup" -> League.FA_CUP;
-            case "fifa world cup winner" -> League.FIFA_WORLD_CUP;
-            case "ligue 1 - france" -> League.LIGUE_ONE;
-            case "ligue 2 - france" -> League.LIGUE_TWO;
-            case "bundesliga - germany" -> League.BUNDESLIGA;
-            case "bundesliga 2 - germany" -> League.BUNDESLIGA_TWO;
-            case "super league - greece" -> League.SUPER_LEAGUE_GREECE;
-            case "serie a - italy" -> League.SERIE_A;
-            case "serie b - italy" -> League.SERIE_B;
-            case "league of ireland" -> League.LEAGUE_OF_IRELAND;
-            case "liga mx" -> League.LIGA_MX;
-            case "dutch eredivisie" -> League.DUTCH_EREDEVISIE;
-            case "primeira liga - portugal" -> League.PRIMEIRA_LIGA;
-            case "la liga - spain" -> League.LA_LIGA;
-            case "la liga 2 - spain" -> League.LA_LIGA_TWO;
-            case "premiership - scotland" -> League.SCOTTISH_PREMIERSHIP;
-            case "allsvenskan - sweden" -> League.ALLSVENSKAN;
-            case "swiss superleague" -> League.SWISS_SUPER_LEAGUE;
-            case "uefa champions league" -> League.UEFA_CHAMPIONS_LEAGUE;
-            case "uefa europa league" -> League.UEFA_EUROPA_LEAGUE;
-            default -> null; // Return null for unmatched group names
-        };
-    }
-
     @Override
     public Set<League> fetchAvailableLeagues(Sport aSport) {
         try {
             Set<League> mySetOfLeagues = new HashSet<>();
-            final String myEndPoint = BASE_URL + "/" + API_VERSION + "/" + "sports?apiKey=" + API_KEY;
+            final String myEndPoint = theOddsApiEndpointProvider.sportsEndpoint();
 
             TheOddsApiSport[] myOddsApiSports = executeGet(myEndPoint, TheOddsApiSport[].class);
 
             for (TheOddsApiSport myOddsApiSport : myOddsApiSports) {
-                if (mapGroupToSport(myOddsApiSport.theGroup) == aSport) {
-                    League myLeague = mapTitleToLeague(myOddsApiSport.theTitle);
+                if (TheOddsSchemaConverter.mapGroupToSport(myOddsApiSport.getTheGroup()) == aSport) {
+                    League myLeague = TheOddsSchemaConverter.mapTitleToLeague(myOddsApiSport.getTheTitle());
                     if (myLeague != null) {
                         mySetOfLeagues.add(myLeague);
                     } else {
-                        System.err.println("Warning: Unrecognized league title - " + myOddsApiSport.theTitle);
+                        theLogger.warn("Warning: Unrecognized league title - {}", myOddsApiSport.getTheTitle());
                     }
                 }
             }
@@ -217,46 +97,298 @@ public class TheOddsApiClient implements SportsApiClient {
     }
 
     @Override
+    public Set<LeagueMetadata> fetchAvailableLeagueMetadata(Sport aSport) {
+        try {
+            Set<LeagueMetadata> myLeagueMetadataSet = new HashSet<>();
+            final String myEndPoint = theOddsApiEndpointProvider.sportsEndpoint();
+
+            TheOddsApiSport[] myOddsApiSports = executeGet(myEndPoint, TheOddsApiSport[].class);
+
+            for (TheOddsApiSport myOddsApiSport : myOddsApiSports) {
+                if (TheOddsSchemaConverter.mapGroupToSport(myOddsApiSport.getTheGroup()) == aSport) {
+                    League myLeague = TheOddsSchemaConverter.mapTitleToLeague(myOddsApiSport.getTheTitle());
+
+                    if (myLeague != null) {
+                        // Construct LeagueMetadata object
+                        LeagueMetadata myLeagueMetadata = new LeagueMetadata(
+                                aSport,
+                                myLeague,
+                                myOddsApiSport.getTheKey(),
+                                myOddsApiSport.getTheTitle(),
+                                Optional.ofNullable(myOddsApiSport.getTheDescription())
+                        );
+
+                        myLeagueMetadataSet.add(myLeagueMetadata);
+                    } else {
+                        theLogger.warn("Warning: Unrecognized league title - {}", myOddsApiSport.getTheTitle());
+                    }
+                }
+            }
+
+            return myLeagueMetadataSet;
+        } catch (Exception myException) {
+            throw new RuntimeException("Failed to fetch league metadata for sport: " + aSport, myException);
+        }
+    }
+
+
+    @Override
     public Set<EventMetadata> fetchAvailableEvents() {
+        try {
+            Set<EventMetadata> myEventMetadataSet = new HashSet<>();
 
-        // GET /v4/sports/{sport}/events?apiKey={apiKey}
-        // You need to map your League to a TheOddsApi sport key
-        throw new UnsupportedOperationException("Not implemented yet");
+            final String myEndPoint = theOddsApiEndpointProvider.sportsEndpoint();
+            TheOddsApiSport[] myOddsApiSports = executeGet(myEndPoint, TheOddsApiSport[].class);
+
+            for (TheOddsApiSport myOddsApiSport : myOddsApiSports) {
+                League myLeague = TheOddsSchemaConverter.mapTitleToLeague(myOddsApiSport.getTheTitle());
+                myEventMetadataSet.addAll(fetchAvailableEvents(myLeague));
+            }
+
+            return myEventMetadataSet;
+        } catch (Exception myException) {
+            throw new RuntimeException("Failed to fetch available events", myException);
+        }
     }
 
     @Override
-    public Set<EventMetadata> fetchAvailableEvents(SportsMetadata aSportsMetadata) {
-        // GET /v4/sports/{sport}/events?apiKey={apiKey}
-        // You need to map your League to a TheOddsApi sport key
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Set<EventMetadata> fetchAvailableEvents(League aLeague) {
+        try {
+            Set<EventMetadata> myEventMetadataSet = new HashSet<>();
+            String myLeagueKey = getLeagueKeyForLeague(aLeague);
+            String myEndpoint = theOddsApiEndpointProvider.eventsEndpoint(myLeagueKey);
+
+            TheOddsApiEvent[] myApiEvents = executeGet(myEndpoint, TheOddsApiEvent[].class);
+
+            for (TheOddsApiEvent myEvent : myApiEvents) {
+                myEventMetadataSet.add(TheOddsSchemaConverter.mapEventToEventMetadata(myEvent, aLeague));
+            }
+
+            return myEventMetadataSet;
+        } catch (Exception myException) {
+            throw new RuntimeException(
+                    "Failed to fetch available events for league: " + aLeague, myException);
+        }
     }
 
     @Override
-    public List<MarketType> fetchMarketTypes(String anEventId) {
-        // TheOddsApi doesn’t have a direct "fetch markets by eventId" endpoint.
-        // You’d likely call /events/{eventId}/odds or /odds and parse the returned "markets" fields from bookmakers
-        // Then extract unique market keys.
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Map<League, Map<EventId, MarketToBookmakers>> fetchMarketToBookmakers(Sport aSport) {
+        Map<League, Map<EventId, MarketToBookmakers>> myLeagueMarketToBookMakers = new HashMap<>();
+        Set<League> myLeagues = fetchAvailableLeagues(aSport);
+
+        for (League myLeague : myLeagues) {
+            myLeagueMarketToBookMakers.put(myLeague, fetchMarketToBookmakers(myLeague));
+        }
+
+        return myLeagueMarketToBookMakers;
+    }
+
+
+    @Override
+    public Map<League, Map<EventId, MarketToBookmakers>> fetchMarketToBookmakers(Sport aSport, Region aRegion) {
+        Set<League> myLeagues = fetchAvailableLeagues(aSport);
+        Map<League, Map<EventId, MarketToBookmakers>> myLeagueMarketToBookMakers = new HashMap<>();
+
+        for (League myLeague : myLeagues) {
+            myLeagueMarketToBookMakers.put(myLeague, fetchMarketToBookmakers(myLeague, aRegion));
+        }
+
+        return myLeagueMarketToBookMakers;
     }
 
     @Override
-    public List<Bookmaker> fetchBookmakerTypes(String anEventId) {
-        // Similar logic: Call event odds or odds endpoint, parse bookmakers, and return the corresponding BookmakerTypes.
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Map<EventId, MarketToBookmakers> fetchMarketToBookmakers(League aLeague) {
+        Map<EventId, MarketToBookmakers> myMarketToBookmakers = new HashMap<>();
+
+        for (Region myRegion : Region.values()) {
+            Map<EventId, MarketToBookmakers> myRegionalMarketToBookmakers = fetchMarketToBookmakers(aLeague, myRegion);
+
+            myRegionalMarketToBookmakers.forEach((anEventId, aRegionalMarketToBookmakers) -> {
+                myMarketToBookmakers.computeIfAbsent(anEventId, eventId -> new MarketToBookmakers(new HashMap<>()));
+
+                Map<MarketType, Set<Bookmaker>> combinedMarkets = myMarketToBookmakers.get(anEventId).theMarketToBookmakers();
+                Map<MarketType, Set<Bookmaker>> regionalMarkets = aRegionalMarketToBookmakers.theMarketToBookmakers();
+
+                regionalMarkets.forEach((aMarketType, aRegionalBookmakers) ->
+                        combinedMarkets.computeIfAbsent(aMarketType, marketType -> new HashSet<>()).addAll(aRegionalBookmakers)
+                );
+            });
+        }
+
+        return myMarketToBookmakers;
     }
 
     @Override
-    public List<Odds> fetchOdds(String anEventId) {
-        // You might need to call GET /v4/sports/{sport}/events/{eventId}/odds or /odds by sport and filter by eventId.
-        // This requires that you already know which sport the event belongs to.
-        // If not known, you might store sport-event mappings from previous fetches.
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Map<EventId, MarketToBookmakers> fetchMarketToBookmakers(League aLeague, Region aRegion) {
+        String myLeagueKey = getLeagueKeyForLeague(aLeague);
+        String myEndpoint = theOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegion);
+
+        Map<EventId, MarketToBookmakers> myMarketToBookmakers = new HashMap<>();
+
+        try {
+            TheOddsApiOdds[] myApiOdds = executeGet(myEndpoint, TheOddsApiOdds[].class);
+
+            for (TheOddsApiOdds myApiOdd : myApiOdds) {
+                String myEventId = myApiOdd.getTheId();
+                Map<MarketType, Set<Bookmaker>> myMarketToBookmaker = new HashMap<>();
+
+                // List of all the bookmakers
+                for (TheOddsApiBookmaker myApiBookmaker : myApiOdd.getTheBookmakers()) {
+                    Bookmaker myBookmaker = Bookmaker.fromBookmakerKey(myApiBookmaker.getTheKey());
+
+                    // List of all the markets
+                    for (TheOddsApiMarket myApiMarket : myApiBookmaker.getTheMarkets()) {
+                        MarketType myMarketType = TheOddsSchemaConverter.mapMarketKeyToMarketType(myApiMarket.getTheKey());
+
+                        if (!myMarketToBookmaker.containsKey(myMarketType)) {
+                            myMarketToBookmaker.put(myMarketType, new HashSet<>());
+                        }
+                        myMarketToBookmaker.get(myMarketType).add(myBookmaker);
+                    }
+                }
+
+                // Found all the markets and bookmakers in those markets for a single event
+                myMarketToBookmakers.put(new EventId(myEventId), new MarketToBookmakers(myMarketToBookmaker));
+            }
+            return myMarketToBookmakers;
+        } catch (Exception e) {
+            // Log and rethrow exception
+            theLogger.error("Error fetching odds data from endpoint: {} for league: {} and region: {}. Exception: {}",
+                    myEndpoint, aLeague, aRegion, e.getMessage());
+            throw new RuntimeException("Failed to fetch market-to-bookmakers mapping", e);
+        }
+    }
+
+
+    @Override
+    public Set<MarketType> fetchMarketTypes(String anEventId) {
+        Set<MarketType> myMarketTypes = new HashSet<>();
+
+        for (Region myRegion : Region.values()) {
+            myMarketTypes.addAll(fetchMarketTypes(anEventId, myRegion));
+        }
+
+        return myMarketTypes;
+    }
+
+
+    @Override
+    public Set<MarketType> fetchMarketTypes(String anEventId, Region aRegion) {
+        try {
+            // Retrieve the leagueKey using the cache
+            String myLeagueKey = getLeagueKeyForEvent(anEventId);
+
+            // Build the endpoint URL with region
+            String myEndpoint = theOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegion,
+                    Map.of("eventIds", anEventId));
+
+            // Fetch the odds data as an array
+            TheOddsApiOdds[] myOddsArray = executeGet(myEndpoint, TheOddsApiOdds[].class);
+
+            // Extract unique market types into a HashSet
+            return Arrays.stream(myOddsArray) // Process the array
+                    .flatMap(myOdds -> myOdds.getTheBookmakers().stream()) // Flatten bookmakers across all odds
+                    .flatMap(bookmaker -> bookmaker.getTheMarkets().stream()) // Flatten markets across all bookmakers
+                    .map(TheOddsApiMarket::getTheKey) // Extract market keys
+                    .map(aMarketKey -> {
+                        MarketType marketType = TheOddsSchemaConverter.mapMarketKeyToMarketType(aMarketKey);
+                        if (marketType == null) {
+                            theLogger.warn("Unknown market key '{}' for event '{}' in region '{}'", aMarketKey, anEventId, aRegion);
+                        }
+                        return marketType;
+                    })
+                    .filter(Objects::nonNull) // Filter out null values
+                    .collect(Collectors.toCollection(HashSet::new)); // Collect explicitly into a HashSet
+        } catch (Exception e) {
+            theLogger.error("Failed to fetch market types for event '{}' and region '{}'", anEventId, aRegion, e);
+            return Set.of();
+        }
     }
 
     @Override
-    public List<Odds> fetchOdds(String anEventId, Bookmaker aBookmaker) {
-        // Similar to fetchOdds(String), but filter by a specific bookmaker key in the response.
-        throw new UnsupportedOperationException("Not implemented yet");
+    public Set<Bookmaker> fetchBookmakers(String anEventId, MarketType aMarketType) {
+        try {
+            // Loop through all available regions and aggregate results
+            return Arrays.stream(Region.values()) // Iterate over all regions
+                    .map(region -> fetchBookmakers(anEventId, aMarketType, region)) // Use the overloaded function
+                    .flatMap(Set::stream) // Flatten all results into a single stream
+                    .collect(Collectors.toSet()); // Collect unique bookmakers
+        } catch (Exception e) {
+            theLogger.error("Failed to fetch bookmakers for event '{}' and market type '{}'", anEventId, aMarketType, e);
+            return Set.of();
+        }
+    }
+
+    @Override
+    public Set<Bookmaker> fetchBookmakers(String anEventId, MarketType aMarketType, Region aRegion) {
+        try {
+            // Retrieve the leagueKey using the cache
+            String myLeagueKey = getLeagueKeyForEvent(anEventId);
+
+            // Build the endpoint URL with region
+            String myEndpoint = theOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegion, Map.of("eventIds", anEventId));
+
+            // Fetch the odds data as an array
+            TheOddsApiOdds[] myOddsArray = executeGet(myEndpoint, TheOddsApiOdds[].class);
+
+            // Extract unique bookmakers that offer the specified MarketType
+            return Arrays.stream(myOddsArray) // Process the odds array
+                    .flatMap(myOdds -> myOdds.getTheBookmakers().stream()) // Flatten bookmakers
+                    .filter(bookmaker -> bookmaker.getTheMarkets()
+                            .stream()
+                            .anyMatch(market -> market.getTheKey().equalsIgnoreCase(aMarketType.name()))) // Filter by MarketType
+                    .map(bookmaker -> Bookmaker.fromBookmakerKey(bookmaker.getTheKey())) // Map to Bookmaker enum
+                    .filter(Objects::nonNull) // Filter out null values
+                    .collect(Collectors.toSet()); // Collect unique bookmakers
+        } catch (Exception e) {
+            theLogger.error("Failed to fetch bookmakers for event '{}', market type '{}', and region '{}'",
+                    anEventId, aMarketType, aRegion, e);
+            return Set.of();
+        }
+    }
+
+    @Override
+    public List<Odds> fetchOdds(String anEventId, MarketType aMarketType) {
+        try {
+            // Loop through all available regions and aggregate odds
+            return Arrays.stream(Region.values()) // Iterate over all regions
+                    .flatMap(region -> fetchOdds(anEventId, aMarketType, region).stream()) // Use the region-specific method
+                    .toList(); // Collect results into a List
+        } catch (Exception e) {
+            theLogger.error("Failed to fetch odds for event '{}' and market type '{}'", anEventId, aMarketType, e);
+            return List.of();
+        }
+    }
+
+
+    @Override
+    public List<Odds> fetchOdds(String anEventId, MarketType aMarketType, Region aRegion) {
+        try {
+            String myLeagueKey = getLeagueKeyForEvent(anEventId);
+            Map<String, String> myOptionalParams = new HashMap<>();
+            myOptionalParams.put("eventIds", anEventId);
+            myOptionalParams.put("markets", aMarketType.name().toLowerCase());
+
+            String myEndpoint = theOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegion, myOptionalParams);
+
+            TheOddsApiOdds[] myOddsArray = executeGet(myEndpoint, TheOddsApiOdds[].class);
+
+            // Extract and map odds
+            return Arrays.stream(myOddsArray) // Process the odds array
+                    .flatMap(myOdds -> myOdds.getTheBookmakers().stream() // Flatten bookmakers
+                            .map(bookmaker -> TheOddsSchemaConverter.mapToOdds(
+                                    anEventId,
+                                    myLeagueKey,
+                                    aMarketType,
+                                    myOdds.getTheHomeTeam(), // Get home team name
+                                    myOdds.getTheAwayTeam(), // Get away team name
+                                    bookmaker))) // Map to Odds
+                    .filter(Objects::nonNull) // Remove any null mappings
+                    .toList(); // Collect results into a List
+        } catch (Exception e) {
+            theLogger.error("Failed to fetch odds for event '{}', market type '{}', and region '{}'", anEventId, aMarketType, aRegion, e);
+            return List.of();
+        }
     }
 
     @Override
@@ -265,12 +397,8 @@ public class TheOddsApiClient implements SportsApiClient {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
-    @Override
-    public String getApiName() {
-        return API_NAME;
-    }
-
     private <T> T executeGet(String anEndpoint, Class<T> aResponseType) throws Exception {
+        // TODO: Remove this
         System.out.println(anEndpoint);
         HttpRequest myRequest = HttpRequest.newBuilder(URI.create(anEndpoint)).GET().build();
         HttpResponse<String> myResponse = theHttpClient.send(myRequest, HttpResponse.BodyHandlers.ofString());
@@ -282,4 +410,83 @@ public class TheOddsApiClient implements SportsApiClient {
             throw new RuntimeException("API call failed with status: " + myResponse.statusCode() + " Body: " + myResponse.body());
         }
     }
+
+    private String getLeagueKeyForEvent(String anEventId) {
+        // Check if the leagueKey is already cached
+        if (theEventIdToLeagueKeyCache.containsKey(anEventId)) {
+            return theEventIdToLeagueKeyCache.get(anEventId);
+        }
+
+        // Load data into the cache if not present
+        synchronized (theEventIdToLeagueKeyCache) { // Ensure thread safety during cache population
+            if (!theEventIdToLeagueKeyCache.containsKey(anEventId)) {
+                populateEventToLeagueKeyCache();
+            }
+        }
+
+        // Return the leagueKey from the cache
+        return theEventIdToLeagueKeyCache.get(anEventId);
+    }
+
+    private void populateEventToLeagueKeyCache() {
+        try {
+            // Step 1: Fetch all sports
+            String mySportsEndpoint = theOddsApiEndpointProvider.sportsEndpoint();
+            TheOddsApiSport[] mySports = executeGet(mySportsEndpoint, TheOddsApiSport[].class);
+
+            // Step 2: For each sport, fetch events and populate the cache
+            for (TheOddsApiSport mySport : mySports) {
+                String myLeagueKey = mySport.getTheKey(); // Extract the leagueKey (sportKey)
+
+                // Call the events endpoint for each sport
+                String myEventsEndpoint = theOddsApiEndpointProvider.eventsEndpoint(myLeagueKey);
+                TheOddsApiEvent[] myEvents = executeGet(myEventsEndpoint, TheOddsApiEvent[].class);
+
+                // Map each eventId to its leagueKey
+                for (TheOddsApiEvent myEvent : myEvents) {
+                    theEventIdToLeagueKeyCache.put(myEvent.getTheId(), myLeagueKey);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to populate the EventId-to-LeagueKey cache", e);
+        }
+    }
+
+    private String getLeagueKeyForLeague(League aLeague) {
+        // Check if the league key is already cached
+        if (theLeagueToKeyCache.containsKey(aLeague)) {
+            return theLeagueToKeyCache.get(aLeague);
+        }
+
+        // Load data into the cache if not present
+        synchronized (theLeagueToKeyCache) { // Ensure thread safety during cache population
+            if (!theLeagueToKeyCache.containsKey(aLeague)) {
+                populateLeagueToKeyCache();
+            }
+        }
+
+        // Return the league key from the cache
+        return theLeagueToKeyCache.get(aLeague);
+    }
+
+    private void populateLeagueToKeyCache() {
+        try {
+            String mySportsEndpoint = theOddsApiEndpointProvider.sportsEndpoint();
+            TheOddsApiSport[] mySports = executeGet(mySportsEndpoint, TheOddsApiSport[].class);
+
+            for (TheOddsApiSport mySport : mySports) {
+                League myLeague = TheOddsSchemaConverter.mapTitleToLeague(mySport.getTheTitle());
+
+                if (myLeague != null) {
+                    theLeagueToKeyCache.put(myLeague, mySport.getTheKey());
+                } else {
+                    theLogger.error("No matching league representation for title '{}'", mySport.getTheTitle());
+                }
+
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to populate the League-to-Key cache", e);
+        }
+    }
+
 }
