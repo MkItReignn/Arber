@@ -3,7 +3,7 @@ package com.arber.enums;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum BookmakerType {
+public enum Bookmaker {
     // US Bookmakers
     BETONLINEAG("BetOnline.ag", "betonlineag", Region.US),
     BETMGM("BetMGM", "betmgm", Region.US),
@@ -87,17 +87,15 @@ public enum BookmakerType {
     private final String theBookmakerKey;
     private final Region theRegion;
 
-    // Static map for lookup by bookmaker key
-    private static final Map<String, BookmakerType> theBookmakerKeyMap = new HashMap<>();
+    private static final Map<String, Bookmaker> theBookmakerKeyMap = new HashMap<>();
 
     static {
-        // Initialize the map once
-        for (BookmakerType myType : BookmakerType.values()) {
+        for (Bookmaker myType : Bookmaker.values()) {
             theBookmakerKeyMap.put(myType.getBookmakerKey(), myType);
         }
     }
 
-    BookmakerType(String aBookmakerName, String aBookmakerKey, Region aBookmakerRegion) {
+    Bookmaker(String aBookmakerName, String aBookmakerKey, Region aBookmakerRegion) {
         this.theBookmakerName = aBookmakerName;
         this.theBookmakerKey = aBookmakerKey;
         this.theRegion = aBookmakerRegion;
@@ -115,7 +113,7 @@ public enum BookmakerType {
         return theRegion;
     }
 
-    public static BookmakerType fromBookmakerKey(String aBookmakerKey) {
+    public static Bookmaker fromBookmakerKey(String aBookmakerKey) {
         return theBookmakerKeyMap.get(aBookmakerKey);
     }
 }

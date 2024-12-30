@@ -24,6 +24,7 @@ public enum League {
     // Cricket Leagues
     BIG_BASH(Sport.CRICKET),
     TEST_MATCHES(Sport.CRICKET),
+    INTERNATIONAL_TWENTY20(Sport.CRICKET),
 
     // Golf Tournaments
     MASTERS(Sport.GOLF),
@@ -70,7 +71,9 @@ public enum League {
     ALLSVENSKAN(Sport.SOCCER),
     SWISS_SUPER_LEAGUE(Sport.SOCCER),
     UEFA_CHAMPIONS_LEAGUE(Sport.SOCCER),
-    UEFA_EUROPA_LEAGUE(Sport.SOCCER);
+    UEFA_EUROPA_LEAGUE(Sport.SOCCER),
+    UEFA_EUROPA_CONFERENCE_LEAGUE(Sport.SOCCER),
+    TURKEY_SUPER_LEAGUE(Sport.SOCCER);
 
     private final Sport theSport;
 
