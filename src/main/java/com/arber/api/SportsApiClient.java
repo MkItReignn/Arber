@@ -1,12 +1,14 @@
 package com.arber.api;
 
-import com.arber.enums.BookmakerType;
+import com.arber.enums.Bookmaker;
 import com.arber.enums.MarketType;
 import com.arber.enums.Sport;
 import com.arber.enums.League;
-import com.arber.model.Event;
-import com.arber.model.Odds;
+import com.arber.enums.Region;
+import com.arber.model.*;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface SportsApiClient {
@@ -14,18 +16,25 @@ public interface SportsApiClient {
     Set<Sport> fetchAvailableSports();
 
     Set<League> fetchAvailableLeagues();
-    List<League> fetchAvailableLeagues(Sport aSport);
+    Set<League> fetchAvailableLeagues(Sport aSport);
+    Set<LeagueMetadata> fetchAvailableLeagueMetadata(Sport aSport);
 
-    List<Event> fetchEvents(League aLeague);
+    Set<EventMetadata> fetchAvailableEvents();
+    Set<EventMetadata> fetchAvailableEvents(League aLeague);
 
-    List<MarketType> fetchMarketTypes(String anEventId);
+    Map<League, Map<EventId, MarketToBookmakers>> fetchMarketToBookmakers(Sport aSport);
+    Map<League, Map<EventId, MarketToBookmakers>> fetchMarketToBookmakers(Sport aSport, Region aRegion);
+    Map<EventId, MarketToBookmakers> fetchMarketToBookmakers(League aLeague);
+    Map<EventId, MarketToBookmakers> fetchMarketToBookmakers(League aLeague, Region aRegion);
 
-    List<BookmakerType> fetchBookmakerTypes(String anEventId);
+    Set<MarketType> fetchMarketTypes(String anEventId);
+    Set<MarketType> fetchMarketTypes(String anEventId, Region aRegion);
 
-    List<Odds> fetchOdds(String anEventId);
-    List<Odds> fetchOdds(String anEventId, BookmakerType aBookmakerType);
+    Set<Bookmaker> fetchBookmakers(String anEventId, MarketType aMarketType);
+    Set<Bookmaker> fetchBookmakers(String anEventId, MarketType aMarketType, Region aRegion);
 
+    List<Odds> fetchOdds(String anEventId, MarketType aMarketType);
+    List<Odds> fetchOdds(String anEventId, MarketType aMarketType, Region aRegion);
 
     boolean isApiAvailable();
-    String getApiName();
 }
