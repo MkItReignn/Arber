@@ -1,4 +1,4 @@
-package com.arber.model;
+package com.arber.datamodel;
 
 import java.util.Optional;
 

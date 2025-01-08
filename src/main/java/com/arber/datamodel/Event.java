@@ -1,8 +1,5 @@
 package com.arber.datamodel;
 
-import com.arber.datamodel.MarketType;
-import com.arber.datamodel.Sport;
-import com.arber.datamodel.League;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -15,15 +12,15 @@ public class Event {
     private final ZonedDateTime theCommenceTime;
     private final List<MarketType> theMarketTypesAvailable;
 
-    public Event(String aId, Sport aSport, League theLeague, String aHomeTeamName, String aAwayTeamName,
-                 ZonedDateTime aCommenceTime, List<MarketType> theMarketTypesAvailable) {
-        this.theId = aId;
-        this.theSport = aSport;
-        this.theLeague = theLeague;
-        this.theHomeTeamName = aHomeTeamName;
-        this.theAwayTeamName = aAwayTeamName;
-        this.theCommenceTime = aCommenceTime;
-        this.theMarketTypesAvailable = theMarketTypesAvailable;
+    public Event(String aId, Sport aSport, League aLeague, String aHomeTeamName, String aAwayTeamName,
+                 ZonedDateTime aCommenceTime, List<MarketType> aMarketTypesAvailable) {
+        theId = aId;
+        theSport = aSport;
+        theLeague = aLeague;
+        theHomeTeamName = aHomeTeamName;
+        theAwayTeamName = aAwayTeamName;
+        theCommenceTime = aCommenceTime;
+        theMarketTypesAvailable = aMarketTypesAvailable;
     }
 
     public String getId() {

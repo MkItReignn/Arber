@@ -1,6 +1,4 @@
-package com.arber.model;
-
-import java.time.ZonedDateTime;
+package com.arber.datamodel;
 
 public record OddsMetadata(
         EventId theEventId,
@@ -11,5 +9,5 @@ public record OddsMetadata(
         Participant theAwayTeam,
         double theHomeOdds,
         double theAwayOdds,
-        ZonedDateTime theLastUpdate // TODO: Make it unix time or smth like that
+        long theLastUpdateMillis
 ) {}

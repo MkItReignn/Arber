@@ -1,10 +1,10 @@
-package com.arber.model;
+package com.arber.datamodel;
 
 public enum MarketType {
-    H2H, // Moneyline
-    SPREADS, // Spreads
-    TOTALS, // Over and under
-    OUTRIGHTS, //
+    H2H,
+    SPREADS,
+    TOTALS,
+    OUTRIGHTS,
     H2H_LAY,
     OUTRIGHTS_LAY;
 }

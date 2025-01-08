@@ -1,5 +1,4 @@
-package com.arber.model;
-
+package com.arber.datamodel;
 
 public record EventMetadata(
         String theEventId,

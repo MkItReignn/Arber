@@ -1,4 +1,4 @@
-package com.arber.model;
+package com.arber.datamodel;
 
 public enum League {
     // American Football Leagues
