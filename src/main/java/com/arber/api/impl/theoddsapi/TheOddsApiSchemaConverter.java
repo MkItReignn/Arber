@@ -1,4 +1,4 @@
-package com.arber.api.impl.TheOddsApi;
+package com.arber.api.impl.theoddsapi;
 
 import com.arber.enums.Bookmaker;
 import com.arber.enums.League;
@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class TheOddsSchemaConverter {
-    private static final Logger theLogger = LoggerFactory.getLogger(TheOddsSchemaConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TheOddsSchemaConverter.class);
 
     public static Sport mapGroupToSport(String aGroup) {
         if (aGroup == null) {
@@ -161,7 +161,7 @@ public class TheOddsSchemaConverter {
         TheOddsApiMarket myMarket = aBookmaker.getTheMarkets().getFirst();
 
         if (myMarket == null) {
-            theLogger.error("TheOddsApiMarket is null for eventId '{}', leagueKey '{}', market '{}'",
+            LOGGER.error("TheOddsApiMarket is null for eventId '{}', leagueKey '{}', market '{}'",
                     anEventId, aLeagueKey, aMarketType);
         }
 
@@ -177,14 +177,14 @@ public class TheOddsSchemaConverter {
             } else if (outcome.getTheName().equalsIgnoreCase(anAwayTeam)) {
                 myAwayOdds = outcome.getThePrice();
             } else {
-                theLogger.warn("Outcome name '{}' does not match home or away team for event '{}'",
+                LOGGER.warn("Outcome name '{}' does not match home or away team for event '{}'",
                         outcome.getTheName(), anEventId);
             }
         }
 
         // Ensure valid odds are present
         if (myHomeOdds == 0.0 || myAwayOdds == 0.0) {
-            theLogger.warn("Incomplete odds for event '{}', market type '{}', bookmaker '{}'",
+            LOGGER.warn("Incomplete odds for event '{}', market type '{}', bookmaker '{}'",
                     anEventId, aMarketType, aBookmaker.getTheKey());
         }
 

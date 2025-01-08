@@ -7,21 +7,21 @@ import java.util.List;
 
 public class TheOddsApiMarket {
 
-    private final String theKey;
+    private final String theMarketKey;
     private final String theLastUpdate;
     private final List<TheOddsApiOutcome> theOutcomes;
 
     @JsonCreator
-    public TheOddsApiMarket(@JsonProperty("key") String aKey,
+    public TheOddsApiMarket(@JsonProperty("key") String aMarketKey,
                             @JsonProperty("last_update") String aLastUpdate,
                             @JsonProperty("outcomes") List<TheOddsApiOutcome> aOutcomes) {
-        this.theKey = aKey;
+        theMarketKey = aMarketKey;
         theLastUpdate = aLastUpdate;
-        this.theOutcomes = aOutcomes;
+        theOutcomes = aOutcomes;
     }
 
-    public String getTheKey() {
-        return theKey;
+    public String getTheMarketKey() {
+        return theMarketKey;
     }
 
     public String getTheLastUpdate() {
@@ -35,7 +35,7 @@ public class TheOddsApiMarket {
     @Override
     public String toString() {
         return "TheOddsApiMarket {" +
-                "theKey='" + theKey + '\'' +
+                "theKey='" + theMarketKey + '\'' +
                 ", theOutcomes=" + theOutcomes +
                 '}';
     }

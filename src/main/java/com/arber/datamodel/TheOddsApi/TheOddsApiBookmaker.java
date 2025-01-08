@@ -7,24 +7,24 @@ import java.util.List;
 
 public class TheOddsApiBookmaker {
 
-    private final String theKey;
+    private final String theBookmakerKey;
     private final String theTitle;
     private final String theLastUpdate;
     private final List<TheOddsApiMarket> theMarkets;
 
     @JsonCreator
-    public TheOddsApiBookmaker(@JsonProperty("key") String aKey,
+    public TheOddsApiBookmaker(@JsonProperty("key") String aBookmakerKey,
                                @JsonProperty("title") String aTitle,
                                @JsonProperty("last_update") String aLastUpdate,
                                @JsonProperty("markets") List<TheOddsApiMarket> aMarkets) {
-        this.theKey = aKey;
-        this.theTitle = aTitle;
-        this.theLastUpdate = aLastUpdate;
-        this.theMarkets = aMarkets;
+        theBookmakerKey = aBookmakerKey;
+        theTitle = aTitle;
+        theLastUpdate = aLastUpdate;
+        theMarkets = aMarkets;
     }
 
-    public String getTheKey() {
-        return theKey;
+    public String getTheBookmakerKey() {
+        return theBookmakerKey;
     }
 
     public String getTheTitle() {
@@ -42,7 +42,7 @@ public class TheOddsApiBookmaker {
     @Override
     public String toString() {
         return "TheOddsApiBookmaker {" +
-                "theKey='" + theKey + '\'' +
+                "theBookmakerKey='" + theBookmakerKey + '\'' +
                 ", theTitle='" + theTitle + '\'' +
                 ", theLastUpdate='" + theLastUpdate + '\'' +
                 ", theMarkets=" + theMarkets +

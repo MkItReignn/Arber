@@ -1,4 +1,4 @@
-package com.arber.enums;
+package com.arber.model;
 
 public enum League {
     // American Football Leagues
@@ -25,6 +25,7 @@ public enum League {
     BIG_BASH(Sport.CRICKET),
     TEST_MATCHES(Sport.CRICKET),
     INTERNATIONAL_TWENTY20(Sport.CRICKET),
+    ONE_DAY_INTERNATIONALS(Sport.CRICKET),
 
     // Golf Tournaments
     MASTERS(Sport.GOLF),
@@ -73,7 +74,9 @@ public enum League {
     UEFA_CHAMPIONS_LEAGUE(Sport.SOCCER),
     UEFA_EUROPA_LEAGUE(Sport.SOCCER),
     UEFA_EUROPA_CONFERENCE_LEAGUE(Sport.SOCCER),
-    TURKEY_SUPER_LEAGUE(Sport.SOCCER);
+    TURKEY_SUPER_LEAGUE(Sport.SOCCER),
+    COPA_LIBERTADORES(Sport.SOCCER)
+    ;
 
     private final Sport theSport;
 

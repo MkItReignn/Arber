@@ -1,4 +1,4 @@
-package com.arber.enums;
+package com.arber.model;
 
 public enum Region {
     US,

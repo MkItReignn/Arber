@@ -1,4 +1,4 @@
-package com.arber.enums;
+package com.arber.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -114,6 +114,6 @@ public enum Bookmaker {
     }
 
     public static Bookmaker fromBookmakerKey(String aBookmakerKey) {
-        return theBookmakerKeyMap.get(aBookmakerKey);
+        return theBookmakerKeyMap.getOrDefault(aBookmakerKey, null);
     }
 }
