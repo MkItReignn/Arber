@@ -1,25 +1,9 @@
 package com.arber.api.impl.theoddsapi;
 
-import com.arber.enums.Bookmaker;
-import com.arber.enums.League;
-import com.arber.enums.MarketType;
-import com.arber.enums.Sport;
-import com.arber.model.EventMetadata;
-import com.arber.model.Odds;
-import com.arber.model.TheOddsApi.TheOddsApiBookmaker;
-import com.arber.model.TheOddsApi.TheOddsApiEvent;
-import com.arber.model.TheOddsApi.TheOddsApiMarket;
-import com.arber.model.TheOddsApi.TheOddsApiOutcome;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
+import com.arber.api.exception.SchemaMappingException;
+import com.arber.datamodel.*;
 
 public class TheOddsSchemaConverter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TheOddsSchemaConverter.class);
-
     public static Sport mapGroupToSport(String aGroup) {
         if (aGroup == null) {
             return null;
@@ -39,7 +23,7 @@ public class TheOddsSchemaConverter {
             case "aussie rules" -> Sport.AUSTRALIAN_FOOTBALL;
             case "golf" -> Sport.GOLF;
             case "boxing" -> Sport.BOXING;
-            default -> null; // Return null for unmatched group names
+            default -> throw new SchemaMappingException(String.format("Unable to map aGroup '%s' to a Sport", aGroup));
         };
     }
 
@@ -131,18 +115,6 @@ public class TheOddsSchemaConverter {
         };
     }
 
-    public static EventMetadata mapEventToEventMetadata(TheOddsApiEvent anEvent, League aLeague) {
-        return new EventMetadata(
-                anEvent.getTheId(),
-                aLeague.getSport(),
-                aLeague,
-                anEvent.getTheSportKey(),
-                anEvent.getTheHomeTeam(),
-                anEvent.getTheAwayTeam(),
-                ZonedDateTime.parse(anEvent.getTheCommenceTime(), DateTimeFormatter.ISO_ZONED_DATE_TIME)
-        );
-    }
-
     public static MarketType mapMarketKeyToMarketType(String aMarketKey) {
         return switch (aMarketKey.toLowerCase()) {
             case "h2h" -> MarketType.H2H;
@@ -153,51 +125,5 @@ public class TheOddsSchemaConverter {
             case "outrights_lay" -> MarketType.OUTRIGHTS_LAY;
             default -> throw new IllegalArgumentException("Unknown market key: " + aMarketKey);
         };
-    }
-
-    public static Odds mapToOdds(String anEventId, String aLeagueKey, MarketType aMarketType,
-                                 String aHomeTeam, String anAwayTeam, TheOddsApiBookmaker aBookmaker) {
-        // We need to be given a single book maker, and within the book maker, a single market with the odds
-        TheOddsApiMarket myMarket = aBookmaker.getTheMarkets().getFirst();
-
-        if (myMarket == null) {
-            LOGGER.error("TheOddsApiMarket is null for eventId '{}', leagueKey '{}', market '{}'",
-                    anEventId, aLeagueKey, aMarketType);
-        }
-
-        List<TheOddsApiOutcome> myOutcomes = myMarket.getTheOutcomes();
-
-        // Initialize odds
-        double myHomeOdds = 0.0;
-        double myAwayOdds = 0.0;
-
-        for (TheOddsApiOutcome outcome : myOutcomes) {
-            if (outcome.getTheName().equalsIgnoreCase(aHomeTeam)) {
-                myHomeOdds = outcome.getThePrice();
-            } else if (outcome.getTheName().equalsIgnoreCase(anAwayTeam)) {
-                myAwayOdds = outcome.getThePrice();
-            } else {
-                LOGGER.warn("Outcome name '{}' does not match home or away team for event '{}'",
-                        outcome.getTheName(), anEventId);
-            }
-        }
-
-        // Ensure valid odds are present
-        if (myHomeOdds == 0.0 || myAwayOdds == 0.0) {
-            LOGGER.warn("Incomplete odds for event '{}', market type '{}', bookmaker '{}'",
-                    anEventId, aMarketType, aBookmaker.getTheKey());
-        }
-
-        return new Odds(
-                anEventId, // The event ID
-                aLeagueKey, // The league key
-                aMarketType, // The market type
-                Bookmaker.fromBookmakerKey(aBookmaker.getTheKey()), // Map bookmaker key to enum
-                aHomeTeam, // Home team name
-                anAwayTeam, // Away team name
-                myHomeOdds, // Home odds
-                myAwayOdds, // Away odds
-                ZonedDateTime.parse(aBookmaker.getTheLastUpdate(), DateTimeFormatter.ISO_ZONED_DATE_TIME)
-        );
     }
 }

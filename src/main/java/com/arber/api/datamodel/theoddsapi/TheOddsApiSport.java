@@ -1,4 +1,4 @@
-package com.arber.model.TheOddsApi;
+package com.arber.api.datamodel.theoddsapi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,35 +19,35 @@ public class TheOddsApiSport {
                            @JsonProperty("description") String aDescription,
                            @JsonProperty("active") boolean aIsActive,
                            @JsonProperty("has_outrights") boolean aHasOutrights) {
-        this.theKey = aKey;
-        this.theGroup = aGroup;
-        this.theTitle = aTitle;
-        this.theDescription = aDescription;
-        this.theIsActive = aIsActive;
-        this.theHasOutrights = aHasOutrights;
+        theKey = aKey;
+        theGroup = aGroup;
+        theTitle = aTitle;
+        theDescription = aDescription;
+        theIsActive = aIsActive;
+        theHasOutrights = aHasOutrights;
     }
 
-    public String getTheKey() {
+    public String getKey() {
         return theKey;
     }
 
-    public String getTheGroup() {
+    public String getGroup() {
         return theGroup;
     }
 
-    public String getTheTitle() {
+    public String getTitle() {
         return theTitle;
     }
 
-    public String getTheDescription() {
+    public String getDescription() {
         return theDescription;
     }
 
-    public boolean getTheIsActive() {
+    public boolean getIsActive() {
         return theIsActive;
     }
 
-    public boolean getTheHasOutrights() {
+    public boolean getHasOutrights() {
         return theHasOutrights;
     }
 

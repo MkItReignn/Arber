@@ -1,4 +1,4 @@
-package com.arber.model.TheOddsApi;
+package com.arber.api.datamodel.theoddsapi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -36,35 +36,35 @@ public class TheOddsApiOdds {
     }
 
 
-    public String getTheId() {
+    public String getId() {
         return theId;
     }
 
-    public Boolean getTheHasOutrights() {
+    public Boolean getHasOutrights() {
         return theHasOutrights;
     }
 
-    public String getTheSportKey() {
+    public String getSportKey() {
         return theSportKey;
     }
 
-    public String getTheSportsTitle() {
+    public String getSportsTitle() {
         return theSportsTitle;
     }
 
-    public String getTheCommenceTime() {
+    public String getCommenceTime() {
         return theCommenceTime;
     }
 
-    public String getTheHomeTeam() {
+    public String getHomeTeam() {
         return theHomeTeam;
     }
 
-    public String getTheAwayTeam() {
+    public String getAwayTeam() {
         return theAwayTeam;
     }
 
-    public List<TheOddsApiBookmaker> getTheBookmakers() {
+    public List<TheOddsApiBookmaker> getBookmakers() {
         return theBookmakers;
     }
 

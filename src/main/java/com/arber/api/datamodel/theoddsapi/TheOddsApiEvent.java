@@ -1,4 +1,4 @@
-package com.arber.model.TheOddsApi;
+package com.arber.api.datamodel.theoddsapi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,40 +21,40 @@ public class TheOddsApiEvent {
                            @JsonProperty("home_team") String aHomeTeam,
                            @JsonProperty("away_team") String aAwayTeam,
                            @JsonProperty("has_outrights") boolean aHasOutrights) {
-        this.theId = aId;
-        this.theSportKey = aSportKey;
-        this.theSportTitle = aSportTitle;
-        this.theCommenceTime = aCommenceTime;
-        this.theHomeTeam = aHomeTeam;
-        this.theAwayTeam = aAwayTeam;
-        this.theHasOutrights = aHasOutrights;
+        theId = aId;
+        theSportKey = aSportKey;
+        theSportTitle = aSportTitle;
+        theCommenceTime = aCommenceTime;
+        theHomeTeam = aHomeTeam;
+        theAwayTeam = aAwayTeam;
+        theHasOutrights = aHasOutrights;
     }
 
-    public String getTheId() {
+    public String getId() {
         return theId;
     }
 
-    public String getTheSportKey() {
+    public String getSportKey() {
         return theSportKey;
     }
 
-    public String getTheSportTitle() {
+    public String getSportTitle() {
         return theSportTitle;
     }
 
-    public String getTheCommenceTime() {
+    public String getCommenceTime() {
         return theCommenceTime;
     }
 
-    public String getTheHomeTeam() {
+    public String getHomeTeam() {
         return theHomeTeam;
     }
 
-    public String getTheAwayTeam() {
+    public String getAwayTeam() {
         return theAwayTeam;
     }
 
-    public boolean getTheHasOutrights() {
+    public boolean getHasOutrights() {
         return theHasOutrights;
     }
 

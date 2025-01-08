@@ -1,4 +1,4 @@
-package com.arber.model.TheOddsApi;
+package com.arber.api.datamodel.theoddsapi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -15,25 +15,25 @@ public class TheOddsApiOutcome {
                              @JsonProperty("description") String aDescription,
                              @JsonProperty("price") double aPrice,
                              @JsonProperty("point") Double aPoint) {
-        this.theName = aName;
-        this.theDescription = aDescription;
-        this.thePrice = aPrice;
-        this.thePoint = aPoint;
+        theName = aName;
+        theDescription = aDescription;
+        thePrice = aPrice;
+        thePoint = aPoint;
     }
 
-    public String getTheName() {
+    public String getName() {
         return theName;
     }
 
-    public String getTheDescription() {
+    public String getDescription() {
         return theDescription;
     }
 
-    public double getThePrice() {
+    public double getPrice() {
         return thePrice;
     }
 
-    public Double getThePoint() {
+    public Double getPoint() {
         return thePoint;
     }
 

@@ -1,4 +1,4 @@
-package com.arber.model.TheOddsApi;
+package com.arber.api.datamodel.theoddsapi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,19 +23,19 @@ public class TheOddsApiBookmaker {
         theMarkets = aMarkets;
     }
 
-    public String getTheBookmakerKey() {
+    public String getBookmakerKey() {
         return theBookmakerKey;
     }
 
-    public String getTheTitle() {
+    public String getTitle() {
         return theTitle;
     }
 
-    public String getTheLastUpdate() {
+    public String getLastUpdate() {
         return theLastUpdate;
     }
 
-    public List<TheOddsApiMarket> getTheMarkets() {
+    public List<TheOddsApiMarket> getMarkets() {
         return theMarkets;
     }
 
