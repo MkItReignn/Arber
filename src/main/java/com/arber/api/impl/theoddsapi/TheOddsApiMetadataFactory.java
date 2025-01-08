@@ -1,4 +1,4 @@
-package com.arber.api.impl.TheOddsApi;
+package com.arber.api.impl.theoddsapi;
 
 public class TheOddsApiMetadataFactory {
     private static final String API_KEY = System.getenv("API_KEY");
