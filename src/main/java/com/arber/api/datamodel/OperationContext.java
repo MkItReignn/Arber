@@ -7,7 +7,9 @@ public enum OperationContext {
     FETCH_EVENT_METADATA("Fetch Event Metadata"),
     FETCH_MARKET_TO_BOOKMAKER("Fetch Market To BookMaker"),
     FETCH_MARKET_TYPES("Fetch Market Types"),
-    FETCH_ODDS_METADATA("Fetch Odds Metadata"),;
+    FETCH_ODDS_METADATA("Fetch Odds Metadata"),
+    FETCH_BOOKMAKERS("Fetch Bookmakers")
+    ;
 
     private final String theDescription;
 
