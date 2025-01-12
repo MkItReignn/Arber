@@ -5,7 +5,7 @@ import com.arber.api.datamodel.OperationContext;
 import com.arber.api.exception.*;
 import com.arber.api.exception.theoddsapi.TheOddsApiFetchException;
 import com.arber.datamodel.*;
-import com.arber.utils.ErrorHandler;
+import com.arber.utils.errors.ErrorHandler;
 import com.arber.utils.HttpClient;
 
 import java.io.IOException;

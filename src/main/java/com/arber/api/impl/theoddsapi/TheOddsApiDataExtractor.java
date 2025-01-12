@@ -4,7 +4,7 @@ import com.arber.datamodel.Bookmaker;
 import com.arber.datamodel.MarketType;
 import com.arber.api.datamodel.theoddsapi.TheOddsApiMarket;
 import com.arber.api.datamodel.theoddsapi.TheOddsApiOdds;
-import com.arber.utils.ErrorHandler;
+import com.arber.utils.errors.ErrorHandler;
 
 import java.util.*;
 import java.util.stream.Collectors;

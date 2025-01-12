@@ -6,7 +6,7 @@ import com.arber.api.exception.theoddsapi.OutcomeValidationException;
 import com.arber.datamodel.*;
 import com.arber.api.datamodel.theoddsapi.*;
 import com.arber.utils.EpochConverter;
-import com.arber.utils.ErrorHandler;
+import com.arber.utils.errors.ErrorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
