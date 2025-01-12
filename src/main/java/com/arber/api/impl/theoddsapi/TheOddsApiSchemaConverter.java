@@ -3,7 +3,7 @@ package com.arber.api.impl.theoddsapi;
 import com.arber.api.exception.SchemaMappingException;
 import com.arber.datamodel.*;
 
-public class TheOddsSchemaConverter {
+public class TheOddsApiSchemaConverter {
     public static Sport mapGroupToSport(String aGroup) {
         if (aGroup == null) {
             return null;
@@ -23,7 +23,7 @@ public class TheOddsSchemaConverter {
             case "aussie rules" -> Sport.AUSTRALIAN_FOOTBALL;
             case "golf" -> Sport.GOLF;
             case "boxing" -> Sport.BOXING;
-            default -> throw new SchemaMappingException(String.format("Unable to map aGroup '%s' to a Sport", aGroup));
+            default -> throw new SchemaMappingException(String.format("Unable to map Group '%s' to a Sport", aGroup));
         };
     }
 
@@ -111,7 +111,7 @@ public class TheOddsSchemaConverter {
             case "uefa europa league" -> League.UEFA_EUROPA_LEAGUE;
             case "turkey super league" -> League.TURKEY_SUPER_LEAGUE;
             case "uefa europa conference league" -> League.UEFA_EUROPA_CONFERENCE_LEAGUE;
-            default -> null; // Return null for unmatched group names
+            default -> throw new SchemaMappingException(String.format("Unable to map Title '%s' to a League", aTitle));
         };
     }
 
@@ -123,7 +123,7 @@ public class TheOddsSchemaConverter {
             case "outrights" -> MarketType.OUTRIGHTS;
             case "h2h_lay" -> MarketType.H2H_LAY;
             case "outrights_lay" -> MarketType.OUTRIGHTS_LAY;
-            default -> throw new IllegalArgumentException("Unknown market key: " + aMarketKey);
+            default -> throw new SchemaMappingException(String.format("Unable to map MarketKey '%s' to a MarketType", aMarketKey));
         };
     }
 }
