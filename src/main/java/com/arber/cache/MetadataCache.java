@@ -4,12 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.arber.enums.Sport;
-import com.arber.enums.League;
-import com.arber.model.EventId;
-import com.arber.model.EventMetadata;
-import com.arber.model.LeagueMetadata;
-import com.arber.model.MarketToBookmakers;
+import com.arber.datamodel.*;
 
 public class MetadataCache {
     private final Map<Sport, Set<LeagueMetadata>> theSportsMetadata;
@@ -35,10 +30,5 @@ public class MetadataCache {
     public void insertEventsMetadata(League aLeague,
                                      Set<EventMetadata> aEventMetadtas) {
         theEventsMetadata.put(aLeague, aEventMetadtas);
-    }
-
-    public void populateSportsMetadata(Set<Sport> aSetOfSports,
-                                       Set<League> aSetOfLeagues) {
-
     }
 }
