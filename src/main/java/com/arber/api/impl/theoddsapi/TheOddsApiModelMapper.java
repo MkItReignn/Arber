@@ -88,14 +88,13 @@ final class TheOddsApiModelMapper {
 
     public static List<OddsMetadata> mapToOddsMetadataList(
             TheOddsApiOdds[] anApiOdds,
-            EventId anEventId,
             LeagueKey aLeagueKey,
             MarketType aMarketType,
             ErrorHandler anErrorHandler) {
         return Arrays.stream(anApiOdds)
                 .flatMap(apiOdds -> apiOdds.getBookmakers().stream()
                         .map(anErrorHandler.wrapFunctionWithErrorHandling(bookmaker ->
-                                createOddsMetadata(bookmaker, apiOdds, anEventId, aLeagueKey, aMarketType))))
+                                createOddsMetadata(bookmaker, apiOdds, new EventId(apiOdds.getId()), aLeagueKey, aMarketType))))
                 .filter(Objects::nonNull)
                 .toList();
     }
