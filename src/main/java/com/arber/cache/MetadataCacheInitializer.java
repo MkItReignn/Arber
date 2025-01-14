@@ -20,7 +20,7 @@ public final class MetadataCacheInitializer {
             mySports = aSportsApiClient.fetchAvailableSports();
         } catch (ApiException e) {
             throw new MetadataCacheInitializerException(
-                    "Unable to initialize MetadataCache, Failed to fetch available sports.", e);
+                    "Unable to initialize MetadataCache, Failed to fetch available Sports", e);
         }
 
         for (Sport mySport : mySports) {
@@ -38,7 +38,7 @@ public final class MetadataCacheInitializer {
             myLeagues = aSportsApiClient.fetchAvailableLeagues();
         } catch (ApiException e) {
             throw new MetadataCacheInitializerException(
-                    "Unable to initialize MetadataCache, Failed to fetch available leagues.", e);
+                    "Unable to initialize MetadataCache, Failed to fetch available Leagues", e);
         }
 
         for (League myLeague : myLeagues) {
