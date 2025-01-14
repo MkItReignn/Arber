@@ -2,7 +2,7 @@ package com.arber.datamodel;
 
 public record OddsMetadata(
         EventId theEventId,
-        LeagueKey theLeagueKey,
+        League theLeague,
         MarketType theMarketType,
         Bookmaker theBookmaker,
         Participant theHomeTeam,

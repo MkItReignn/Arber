@@ -5,7 +5,7 @@ import java.util.Optional;
 public record LeagueMetadata(
         Sport theSport,
         League theLeague,
-        String theLeagueKey,
+        LeagueKey theLeagueKey,
         String theName,
         Optional<String> theDescription
 ) {}
