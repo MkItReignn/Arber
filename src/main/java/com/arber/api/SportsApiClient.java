@@ -29,8 +29,8 @@ public interface SportsApiClient {
     Set<Bookmaker> fetchBookmakers(EventId anEventId, MarketType aMarketType) throws ApiException;
     Set<Bookmaker> fetchBookmakers(EventId anEventId, MarketType aMarketType, Set<Region> aRegions) throws ApiException;
 
-    List<OddsMetadata> fetchOddsMetadata(League aLeague, MarketType aMarketType) throws ApiException;
-    List<OddsMetadata> fetchOddsMetadata(League aLeague, MarketType aMarketType, Set<Region> aRegion) throws ApiException;
-    List<OddsMetadata> fetchOddsMetadata(EventId anEventId, MarketType aMarketType) throws ApiException;
-    List<OddsMetadata> fetchOddsMetadata(EventId anEventId, MarketType aMarketType, Set<Region> aRegions) throws ApiException;
+    List<OddsMetadata> fetchOddsMetadata(League aLeague, Set<MarketType> aMarketTypes) throws ApiException;
+    List<OddsMetadata> fetchOddsMetadata(League aLeague, Set<MarketType> aMarketTypes, Set<Region> aRegions) throws ApiException;
+    List<OddsMetadata> fetchOddsMetadata(EventId anEventId, Set<MarketType> aMarketTypes) throws ApiException;
+    List<OddsMetadata> fetchOddsMetadata(EventId anEventId, Set<MarketType> aMarketTypes, Set<Region> aRegions) throws ApiException;
 }

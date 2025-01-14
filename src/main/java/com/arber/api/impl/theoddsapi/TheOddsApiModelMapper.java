@@ -79,56 +79,45 @@ final class TheOddsApiModelMapper {
                 anEvent.getId(),
                 aLeague.getSport(),
                 aLeague,
-                anEvent.getSportKey(),
+                new LeagueKey(anEvent.getSportKey()),
                 anEvent.getHomeTeam(),
                 anEvent.getAwayTeam(),
                 EpochConverter.toEpochMilliseconds(anEvent.getCommenceTime())
         );
     }
 
-    public static List<OddsMetadata> mapToOddsMetadataList(
-            TheOddsApiOdds[] anApiOdds,
-            LeagueKey aLeagueKey,
-            MarketType aMarketType,
-            ErrorHandler anErrorHandler) {
+    public static List<OddsMetadata> mapToOddsMetadataList(TheOddsApiOdds[] anApiOdds) {
         return Arrays.stream(anApiOdds)
                 .flatMap(apiOdds -> apiOdds.getBookmakers().stream()
-                        .map(anErrorHandler.wrapFunctionWithErrorHandling(bookmaker ->
-                                createOddsMetadata(bookmaker, apiOdds, new EventId(apiOdds.getId()), aLeagueKey, aMarketType))))
-                .filter(Objects::nonNull)
-                .toList();
+                        .flatMap(bookmaker ->
+                                bookmaker.getMarkets().stream()
+                                        .map(market ->
+                                                createOddsMetadata(
+                                                        new EventId(apiOdds.getId()),
+                                                        TheOddsApiSchemaConverter.mapTitleToLeague(apiOdds.getSportsTitle()),
+                                                        TheOddsApiSchemaConverter.mapMarketKeyToMarketType(market.getMarketKey()),
+                                                        Bookmaker.fromBookmakerKey(bookmaker.getBookmakerKey()),
+                                                        new Participant(apiOdds.getHomeTeam()),
+                                                        new Participant(apiOdds.getAwayTeam()),
+                                                        EpochConverter.toEpochMilliseconds(market.getLastUpdate()),
+                                                        market.getOutcomes()
+                                        ))
+                        )
+                )
+                .collect(Collectors.toList());
     }
 
-    private static OddsMetadata createOddsMetadata(TheOddsApiBookmaker aBookmaker, TheOddsApiOdds anApiOdds,
-                                                   EventId anEventId, LeagueKey aLeagueKey, MarketType aMarketType)
-            throws SchemaValidationException {
-        TheOddsApiMarket market = findApiMarketByMarketType(aBookmaker.getMarkets(), aMarketType);
-        List<TheOddsApiOutcome> outcomes = market.getOutcomes();
-        Bookmaker mappedBookmaker = Bookmaker.fromBookmakerKey(aBookmaker.getBookmakerKey());
-        long myLastUpdate = EpochConverter.toEpochMilliseconds(aBookmaker.getLastUpdate());
+    private static OddsMetadata createOddsMetadata(EventId anEventId, League aLeague, MarketType aMarketType,
+                                                   Bookmaker aBookmaker, Participant aHomeTeam, Participant anAwayTeam,
+                                                   long aLastUpdate, List<TheOddsApiOutcome> anOutcomes) {
 
-        return mapToOddsMetadata(
-                outcomes,
-                mappedBookmaker,
-                myLastUpdate,
-                anEventId,
-                aLeagueKey,
-                aMarketType,
-                anApiOdds.getHomeTeam(),
-                anApiOdds.getAwayTeam()
-        );
-    }
-
-    public static OddsMetadata mapToOddsMetadata(List<TheOddsApiOutcome> anApiOutcomes, Bookmaker aBookmaker,
-                                                 long aLastUpdate, EventId anEventId, LeagueKey aLeagueKey,
-                                                 MarketType aMarketType, String aHomeTeam, String anAwayTeam) {
         double myHomeOdds = 0.0;
         double myAwayOdds = 0.0;
 
-        for (TheOddsApiOutcome outcome : anApiOutcomes) {
-            if (outcome.getName().equalsIgnoreCase(aHomeTeam)) {
+        for (TheOddsApiOutcome outcome : anOutcomes) {
+            if (outcome.getName().equalsIgnoreCase(aHomeTeam.theName())) {
                 myHomeOdds = outcome.getPrice();
-            } else if (outcome.getName().equalsIgnoreCase(anAwayTeam)) {
+            } else if (outcome.getName().equalsIgnoreCase(anAwayTeam.theName())) {
                 myAwayOdds = outcome.getPrice();
             } else {
                 throw new OutcomeValidationException(String.format("Outcome name '%s' does not match home or away team for event '%s'",
@@ -143,24 +132,15 @@ final class TheOddsApiModelMapper {
 
         return new OddsMetadata(
                 anEventId,
-                aLeagueKey,
+                aLeague,
                 aMarketType,
                 aBookmaker,
-                new Participant(aHomeTeam),
-                new Participant(anAwayTeam),
+                aHomeTeam,
+                anAwayTeam,
                 myHomeOdds,
                 myAwayOdds,
                 aLastUpdate
         );
-    }
-
-    public static TheOddsApiMarket findApiMarketByMarketType(List<TheOddsApiMarket> anApiMarkets,
-                                                             MarketType aMarketType) throws SchemaValidationException {
-        return anApiMarkets.stream()
-                .filter(market -> market.getMarketKey().equalsIgnoreCase(aMarketType.name()))
-                .findFirst()
-                .orElseThrow(() -> new SchemaValidationException(String.format("MarketType '%s' could not be found in" +
-                        "List<TheOddsApiMarket> '%s'", aMarketType, anApiMarkets)));
     }
 
     private static boolean matchesTargetSport(TheOddsApiSport apiSport, Sport aTargetSport) throws SchemaMappingException {
@@ -172,7 +152,7 @@ final class TheOddsApiModelMapper {
         return new LeagueMetadata(
                 targetSport,
                 league,
-                apiSport.getKey(),
+                new LeagueKey(apiSport.getKey()),
                 apiSport.getTitle(),
                 Optional.ofNullable(apiSport.getDescription())
         );

@@ -157,7 +157,7 @@ public final class TheOddsApiClient implements SportsApiClient {
     @Override
     public Set<MarketType> fetchMarketTypes(EventId anEventId, Set<Region> aRegions) throws ApiException {
         LeagueKey myLeagueKey = theCache.getLeagueKeyForEvent(anEventId);
-        String myEndpoint = TheOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegions,
+        String myEndpoint = TheOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegions, Set.of(),
                 Map.of("eventIds", anEventId.theEventId()));
         return callAndMap(
                 myEndpoint,
@@ -178,8 +178,8 @@ public final class TheOddsApiClient implements SportsApiClient {
     public Set<Bookmaker> fetchBookmakers(EventId anEventId, MarketType aMarketType, Set<Region> aRegions)
             throws ApiException {
         LeagueKey myLeagueKey = theCache.getLeagueKeyForEvent(anEventId);
-        String myEndpoint = TheOddsApiEndpointProvider.oddsEndpoint(myLeagueKey,
-                aRegions, Map.of("eventIds", anEventId.theEventId()));
+        String myEndpoint = TheOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegions, Set.of(),
+                Map.of("eventIds", anEventId.theEventId()));
         return callAndMap(
                 myEndpoint,
                 TheOddsApiOdds[].class,
@@ -190,46 +190,42 @@ public final class TheOddsApiClient implements SportsApiClient {
     }
 
     @Override
-    public List<OddsMetadata> fetchOddsMetadata(League aLeague, MarketType aMarketType) throws ApiException {
+    public List<OddsMetadata> fetchOddsMetadata(League aLeague, Set<MarketType> aMarketTypes) throws ApiException {
         Set<Region> myAllRegions = Set.of(Region.values());
-        return fetchOddsMetadata(aLeague, aMarketType, myAllRegions);
+        return fetchOddsMetadata(aLeague, aMarketTypes, myAllRegions);
     }
 
     @Override
-    public List<OddsMetadata> fetchOddsMetadata(League aLeague, MarketType aMarketType, Set<Region> aRegion) throws ApiException {
+    public List<OddsMetadata> fetchOddsMetadata(League aLeague, Set<MarketType> aMarketTypes, Set<Region> aRegions) throws ApiException {
         LeagueKey myLeagueKey = theCache.getLeagueKeyForLeague(aLeague);
-        Map<String, String> myOptionalParams = Map.of(
-                "markets", aMarketType.name().toLowerCase()
-        );
-        String myEndpoint = TheOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegion, myOptionalParams);
+        String myEndpoint = TheOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegions, aMarketTypes);
 
         return callAndMap(
                 myEndpoint,
                 TheOddsApiOdds[].class,
-                myApiOdds -> TheOddsApiModelMapper.mapToOddsMetadataList(myApiOdds, myLeagueKey, aMarketType, theErrorHandler),
+                TheOddsApiModelMapper::mapToOddsMetadataList,
                 theLiveRetryPolicy,
                 OperationContext.FETCH_ODDS_METADATA);
     }
 
     @Override
-    public List<OddsMetadata> fetchOddsMetadata(EventId anEventId, MarketType aMarketType) throws ApiException {
+    public List<OddsMetadata> fetchOddsMetadata(EventId anEventId, Set<MarketType> aMarketTypes) throws ApiException {
         Set<Region> myAllRegions = Set.of(Region.values());
-        return fetchOddsMetadata(anEventId, aMarketType, myAllRegions);
+        return fetchOddsMetadata(anEventId, aMarketTypes, myAllRegions);
     }
 
     @Override
-    public List<OddsMetadata> fetchOddsMetadata(EventId anEventId, MarketType aMarketType, Set<Region> aRegions)
+    public List<OddsMetadata> fetchOddsMetadata(EventId anEventId, Set<MarketType> aMarketTypes, Set<Region> aRegions)
             throws ApiException {
         LeagueKey myLeagueKey = theCache.getLeagueKeyForEvent(anEventId);
         Map<String, String> myOptionalParams = Map.of(
-                "eventIds", anEventId.theEventId(),
-                "markets", aMarketType.name().toLowerCase()
+                "eventIds", anEventId.theEventId()
         );
-        String myEndpoint = TheOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegions, myOptionalParams);
+        String myEndpoint = TheOddsApiEndpointProvider.oddsEndpoint(myLeagueKey, aRegions, aMarketTypes,myOptionalParams);
 
         return callAndMap(myEndpoint,
                 TheOddsApiOdds[].class,
-                myApiOdds -> TheOddsApiModelMapper.mapToOddsMetadataList(myApiOdds, myLeagueKey, aMarketType, theErrorHandler),
+                TheOddsApiModelMapper::mapToOddsMetadataList,
                 theLiveRetryPolicy,
                 OperationContext.FETCH_ODDS_METADATA);
     }

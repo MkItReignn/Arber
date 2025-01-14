@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.arber.datamodel.MarketType;
 import com.arber.datamodel.Region;
 import com.arber.datamodel.LeagueKey;
 
@@ -42,17 +43,27 @@ public final class TheOddsApiEndpointProvider {
         return appendOptionalArguments(myEndpoint, anOptionalParameters);
     }
 
-    public static String oddsEndpoint(LeagueKey aLeagueKey, Set<Region> aRegion) {
-        return oddsEndpoint(aLeagueKey, aRegion, Map.of());
+    public static String oddsEndpoint(LeagueKey aLeagueKey, Set<Region> aRegions) {
+        return oddsEndpoint(aLeagueKey, aRegions, Set.of(MarketType.values()), Map.of());
     }
 
-    public static String oddsEndpoint(LeagueKey aLeagueKey, Set<Region> aRegion, Map<String, String> anOptionalParameters) {
-        String myRegions = aRegion.stream()
-                .map(region -> region.name().toLowerCase())
-                .collect(Collectors.joining(","));
-        anOptionalParameters.put("regions", myRegions);
+    public static String oddsEndpoint(LeagueKey aLeagueKey, Set<Region> aRegions, Set<MarketType> aMarketTypes) {
+        return oddsEndpoint(aLeagueKey, aRegions, aMarketTypes, Map.of());
+    }
 
-        TheOddsApiEndpointParameterValidator.validateParameters(anOptionalParameters);
+    public static String oddsEndpoint(LeagueKey aLeagueKey, Set<Region> aRegion, Set<MarketType> aMarkets, Map<String, String> aParameters) {
+        // TODO: An exception should occur where there NEEDS to be a region, if it is empty, we can't create an endpoint
+        if (!aRegion.isEmpty()) {
+            String myRegions = concatenateEnumNamesLowerCaseWithComma(aRegion);
+            aParameters.put("regions", myRegions);
+        }
+
+        if (!aMarkets.isEmpty()) {
+            String myMarkets = concatenateEnumNamesLowerCaseWithComma(aMarkets);
+            aParameters.put("markets", myMarkets);
+        }
+
+        TheOddsApiEndpointParameterValidator.validateParameters(aParameters);
 
         String myEndpoint = ODDS_API_METADATA.theBaseUrl() +
                 "/" +
@@ -61,7 +72,7 @@ public final class TheOddsApiEndpointProvider {
                 aLeagueKey.theLeagueKey() +
                 "/odds?" +
                 "apiKey=" + ODDS_API_METADATA.theApiKey();
-        return appendOptionalArguments(myEndpoint, anOptionalParameters);
+        return appendOptionalArguments(myEndpoint, aParameters);
     }
 
     public static String eventsEndpoint(LeagueKey aLeagueKey) {
@@ -78,5 +89,14 @@ public final class TheOddsApiEndpointProvider {
                 "/events?apiKey=" +
                 ODDS_API_METADATA.theApiKey();
         return appendOptionalArguments(myEndpoint, anOptionalParameters);
+    }
+
+    private static <E extends Enum<E>> String concatenateEnumNamesLowerCaseWithComma(Set<E> anEnums) {
+        if (anEnums == null || anEnums.isEmpty()) {
+            return "";
+        }
+        return anEnums.stream()
+                .map(enumValue -> enumValue.name().toLowerCase())
+                .collect(Collectors.joining(","));
     }
 }

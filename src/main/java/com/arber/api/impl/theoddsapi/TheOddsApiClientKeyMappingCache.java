@@ -4,12 +4,12 @@ import com.arber.datamodel.League;
 import com.arber.datamodel.EventId;
 import com.arber.datamodel.LeagueKey;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public final class TheOddsApiClientKeyMappingCache {
-    private final Map<EventId, LeagueKey> theEventIdToLeagueKeyCache = new ConcurrentHashMap<>();
-    private final Map<League, LeagueKey> theLeagueToKeyCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<EventId, LeagueKey> theEventIdToLeagueKeyCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<League, LeagueKey> theLeagueToKeyCache = new ConcurrentHashMap<>();
 
     public void addEventToLeagueMapping(EventId anEventId, LeagueKey aLeagueKey) {
         theEventIdToLeagueKeyCache.put(anEventId, aLeagueKey);
