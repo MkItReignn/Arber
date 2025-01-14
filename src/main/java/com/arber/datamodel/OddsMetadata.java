@@ -10,4 +10,8 @@ public record OddsMetadata(
         double theHomeOdds,
         double theAwayOdds,
         long theLastUpdateMillis
-) {}
+) {
+    public OddsMetadataId getId() {
+        return new OddsMetadataId(theEventId, theMarketType, theBookmaker);
+    }
+}
