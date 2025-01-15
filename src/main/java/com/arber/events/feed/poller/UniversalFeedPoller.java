@@ -88,7 +88,7 @@ public class UniversalFeedPoller implements FeedPoller {
 
                 MarketToBookmakers myFilteredSet = filterByMarkets(myUniqueSet);
                 theMetadataCache.updateEventMarketToBookmakers(myEventId, myFilteredSet);
-                theEventBus.publish(new MarketToBookmakersUpdateEvent(myEventId, myFilteredSet));
+                theEventBus.publish(new MarketToBookmakersUpdateEvent(myLeague, myEventId, myFilteredSet));
             }
         }
     }
