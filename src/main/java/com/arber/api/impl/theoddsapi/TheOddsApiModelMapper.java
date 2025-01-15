@@ -76,7 +76,7 @@ final class TheOddsApiModelMapper {
 
     public static EventMetadata mapEventToEventMetadata(TheOddsApiEvent anEvent, League aLeague) {
         return new EventMetadata(
-                anEvent.getId(),
+                new EventId(anEvent.getId()),
                 aLeague.getSport(),
                 aLeague,
                 new LeagueKey(anEvent.getSportKey()),

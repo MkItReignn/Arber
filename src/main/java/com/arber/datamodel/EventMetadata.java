@@ -1,7 +1,7 @@
 package com.arber.datamodel;
 
 public record EventMetadata(
-        String theEventId,
+        EventId theEventId,
         Sport theSport,
         League theLeague,
         LeagueKey theLeagueKey,
