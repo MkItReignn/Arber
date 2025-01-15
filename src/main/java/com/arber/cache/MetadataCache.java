@@ -18,6 +18,18 @@ public class MetadataCache {
         theEventMarketToBookmakers = new ConcurrentHashMap<>();
     }
 
+    public Map<Sport, Set<LeagueMetadata>> getSportsMetadata() {
+        return Collections.unmodifiableMap(theSportsMetadata);
+    }
+
+    public Map<League, Set<EventMetadata>> getEventsMetadata() {
+        return Collections.unmodifiableMap(theEventsMetadata);
+    }
+
+    public Map<EventId, MarketToBookmakers> getEventMarketToBookmakers() {
+        return Collections.unmodifiableMap(theEventMarketToBookmakers);
+    }
+
     public void insertLeagueMetadata(Sport aSport,
                                      Set<LeagueMetadata> aLeagueMetadata) {
         theSportsMetadata.put(aSport, aLeagueMetadata);
